@@ -1,9 +1,13 @@
 using Newtonsoft.Json;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
+using PunchGame.Server.CrossCutting;
 using PunchGame.Server.Room.Core.Configs;
 using PunchGame.Server.Room.Core.Input;
 using PunchGame.Server.Room.Core.Logic;
+using PunchGame.Server.Room.Core.Logic.Connection;
+using PunchGame.Server.Room.Core.Logic.Game;
+using PunchGame.Server.Room.Core.Logic.GeneralGameState;
 using PunchGame.Server.Room.Core.Models;
 using PunchGame.Server.Room.Core.Output;
 using System;
@@ -18,16 +22,19 @@ namespace PunchGame.Server.Tests
         [TestCaseSource(nameof(TestCasesForNUnit))]
         public void WorksAsExpected(TestCase testCase)
         {
-            var room = new RoomProcessor(new StubRandomProvider(testCase.RandomValue), testCase.Config);
-            var initialRoomState = room.MakeInitialState();
+            var randomProvider = new StubRandomProvider(testCase.RandomValue);
+            var playerIdGenerator = new StubPlayerIdProvider(testCase.PlayerIds);
 
-            var (afterPrepareRoomState, _) = room.Process(
-               initialRoomState,
-               testCase.PrepareCommands);
+            var room = ServerModule.BuildRoomProcessor(testCase.Config, playerIdGenerator, randomProvider);
+            var roomState = room.MakeInitialState(testCase.RoomId);
 
-            var (_, producedEvents) = room.Process(
-               initialRoomState,
-               testCase.PrepareCommands);
+            var _ = room.Process(
+              roomState,
+              testCase.PrepareCommands);
+
+            var producedEvents = room.Process(
+              roomState,
+              testCase.ActCommands);
 
             Assert.That(producedEvents,
                 new CollectionEquivalentConstraint(testCase.ExpectedEvents).Using(MakeJsonValueComparer()));
@@ -37,24 +44,6 @@ namespace PunchGame.Server.Tests
         {
             get
             {
-                var initialLifeAmount = 100;
-
-                var roomConfig = new RoomConfig
-                {
-                    Player = new PlayerConfig
-                    {
-                        InitialLifeAmount = initialLifeAmount,
-                        Punch = new PunchConfig
-                        {
-                            Damage = 5,
-                            CriticalChance = 0.5m,
-                            CriticalDamage = 50,
-                            MinimalTimeDiff = TimeSpan.FromSeconds(1)
-                        }
-                    },
-                    TimeQuant = TimeSpan.FromSeconds(0.1)
-                };
-
                 // single player join
                 {
                     var playerConnectionId = Guid.NewGuid();
@@ -65,7 +54,7 @@ namespace PunchGame.Server.Tests
                     yield return new TestCase
                     {
                         CaseName = "SinglePlayerJoin",
-                        Config = roomConfig,
+                        Config = GetRoomConfig(life: 100),
                         PlayerIds = {
                             playerId,
                         },
@@ -75,7 +64,8 @@ namespace PunchGame.Server.Tests
                             {
                                 ByConnectionId = playerConnectionId,
                                 Name = playerName,
-                                Timestamp = timestamp
+                                Timestamp = timestamp,
+                                ClientVersion = 1
                             }
                         },
                         ExpectedEvents =
@@ -84,19 +74,12 @@ namespace PunchGame.Server.Tests
                                 ConnectionId = playerConnectionId,
                                 JoinedAsPlayerId = playerId,
                                 Players = new List<AttemptToJoinSuccessfulEvent.ShortPlayerInfo> {
-                                    new AttemptToJoinSuccessfulEvent.ShortPlayerInfo
-                                    {
-                                        IsConnected = true,
-                                        Life = initialLifeAmount,
-                                        UserId = playerId,
-                                        Name = playerName
-                                    }
                                 },
                                 Timestamp = timestamp,
                             },
                             new PlayerJoinedEvent
                             {
-                                LifeAmount = initialLifeAmount,
+                                LifeAmount = 100,
                                 Name = playerName,
                                 PlayerId = playerId,
                                 Timestamp = timestamp
@@ -107,6 +90,8 @@ namespace PunchGame.Server.Tests
 
                 // join of second player 
                 {
+                    var roomId = Guid.NewGuid();
+
                     var firstPlayer = new
                     {
                         ConnectionId = Guid.NewGuid(),
@@ -126,7 +111,8 @@ namespace PunchGame.Server.Tests
                     yield return new TestCase
                     {
                         CaseName = "JoinOfSecondPlayerStartsGame",
-                        Config = roomConfig,
+                        RoomId = roomId,
+                        Config = GetRoomConfig(life: 100),
                         PlayerIds = {
                             firstPlayer.Id,
                             secondPlayer.Id,
@@ -137,7 +123,8 @@ namespace PunchGame.Server.Tests
                             {
                                 ByConnectionId = firstPlayer.ConnectionId,
                                 Name = firstPlayer.Name,
-                                Timestamp = timestamp
+                                Timestamp = timestamp,
+                                ClientVersion = 1
                             }
                         },
                         ActCommands =
@@ -146,7 +133,8 @@ namespace PunchGame.Server.Tests
                             {
                                 ByConnectionId = secondPlayer.ConnectionId,
                                 Name = secondPlayer.Name,
-                                Timestamp = timestamp
+                                Timestamp = timestamp,
+                                ClientVersion = 1
                             }
                         },
                         ExpectedEvents =
@@ -158,23 +146,16 @@ namespace PunchGame.Server.Tests
                                     new AttemptToJoinSuccessfulEvent.ShortPlayerInfo
                                     {
                                         IsConnected = true,
-                                        Life = initialLifeAmount,
-                                        UserId = firstPlayer.Id,
+                                        Life = 100,
+                                        PlayerId = firstPlayer.Id,
                                         Name = firstPlayer.Name
                                     },
-                                    new AttemptToJoinSuccessfulEvent.ShortPlayerInfo
-                                    {
-                                        IsConnected = true,
-                                        Life = initialLifeAmount,
-                                        UserId = secondPlayer.Id,
-                                        Name = secondPlayer.Name
-                                    }
                                 },
                                 Timestamp = timestamp,
                             },
                             new PlayerJoinedEvent
                             {
-                                LifeAmount = initialLifeAmount,
+                                LifeAmount = 100,
                                 Name = secondPlayer.Name,
                                 PlayerId = secondPlayer.Id,
                                 Timestamp = timestamp
@@ -182,6 +163,11 @@ namespace PunchGame.Server.Tests
                             new GameStartedEvent
                             {
                                 Timestamp = timestamp,
+                            },
+                            new RoomFilledEvent
+                            {
+                                Timestamp = timestamp,
+                                RoomId = roomId
                             }
                         }
                     };
@@ -208,7 +194,7 @@ namespace PunchGame.Server.Tests
                     yield return new TestCase
                     {
                         CaseName = "PunchCreatesDamage",
-                        Config = roomConfig,
+                        Config = GetRoomConfig(life: 100),
                         RandomValue = 0m,
                         PlayerIds = {
                             firstPlayer.Id,
@@ -220,13 +206,15 @@ namespace PunchGame.Server.Tests
                             {
                                 ByConnectionId = firstPlayer.ConnectionId,
                                 Name = firstPlayer.Name,
-                                Timestamp = timestamp
+                                Timestamp = timestamp,
+                                ClientVersion = 1
                             },
                             new ConnectToRoomCommand
                             {
                                 ByConnectionId = secondPlayer.ConnectionId,
                                 Name = secondPlayer.Name,
-                                Timestamp = timestamp
+                                Timestamp = timestamp,
+                                ClientVersion = 1
                             }
                         },
                         ActCommands =
@@ -250,7 +238,195 @@ namespace PunchGame.Server.Tests
                         }
                     };
                 }
+
+                // second punch doesn't works if it's too near
+                {
+                    var roomId = Guid.NewGuid();
+
+                    var firstPlayer = new
+                    {
+                        ConnectionId = Guid.NewGuid(),
+                        Id = Guid.NewGuid(),
+                        Name = "first",
+                    };
+
+                    var secondPlayer = new
+                    {
+                        ConnectionId = Guid.NewGuid(),
+                        Id = Guid.NewGuid(),
+                        Name = "second",
+                    };
+
+                    var timestamps = new[] {
+                        DateTime.UtcNow,
+                        DateTime.UtcNow.AddSeconds(2),
+                        DateTime.UtcNow.AddSeconds(2)
+                    };
+
+                    yield return new TestCase
+                    {
+                        CaseName = "SecondPunchDoesntWorks",
+                        RoomId = roomId,
+                        Config = GetRoomConfig(life: 10),
+                        RandomValue = 0m,
+                        PlayerIds = {
+                            firstPlayer.Id,
+                            secondPlayer.Id,
+                        },
+                        PrepareCommands =
+                        {
+                            new ConnectToRoomCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Name = firstPlayer.Name,
+                                Timestamp = timestamps[0],
+                                ClientVersion = 1
+                            },
+                            new ConnectToRoomCommand
+                            {
+                                ByConnectionId = secondPlayer.ConnectionId,
+                                Name = secondPlayer.Name,
+                                Timestamp = timestamps[0],
+                                ClientVersion = 1
+                            },
+                            new PunchCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Timestamp = timestamps[1],
+                                VictimId = secondPlayer.Id,
+                            }
+                        },
+                        ActCommands =
+                        {
+                            new PunchCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Timestamp = timestamps[2],
+                                VictimId = secondPlayer.Id,
+                            }
+                        },
+                        ExpectedEvents =
+                        {
+                        }
+                    };
+                }
+
+                // punch creates death & game end 
+                {
+                    var roomId = Guid.NewGuid();
+
+                    var firstPlayer = new
+                    {
+                        ConnectionId = Guid.NewGuid(),
+                        Id = Guid.NewGuid(),
+                        Name = "first",
+                    };
+
+                    var secondPlayer = new
+                    {
+                        ConnectionId = Guid.NewGuid(),
+                        Id = Guid.NewGuid(),
+                        Name = "second",
+                    };
+
+                    var timestamps = new[] {
+                        DateTime.UtcNow,
+                        DateTime.UtcNow.AddSeconds(2),
+                        DateTime.UtcNow.AddSeconds(4)
+                    };
+
+                    yield return new TestCase
+                    {
+                        CaseName = "PunchCreatesDeathAndGameEnd",
+                        RoomId = roomId,
+                        Config = GetRoomConfig(life: 10),
+                        RandomValue = 0m,
+                        PlayerIds = {
+                            firstPlayer.Id,
+                            secondPlayer.Id,
+                        },
+                        PrepareCommands =
+                        {
+                            new ConnectToRoomCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Name = firstPlayer.Name,
+                                Timestamp = timestamps[0],
+                                ClientVersion = 1
+                            },
+                            new ConnectToRoomCommand
+                            {
+                                ByConnectionId = secondPlayer.ConnectionId,
+                                Name = secondPlayer.Name,
+                                Timestamp = timestamps[0],
+                                ClientVersion = 1
+                            },
+                            new PunchCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Timestamp = timestamps[1],
+                                VictimId = secondPlayer.Id,
+                            }
+                        },
+                        ActCommands =
+                        {
+                            new PunchCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Timestamp = timestamps[2],
+                                VictimId = secondPlayer.Id,
+                            }
+                        },
+                        ExpectedEvents =
+                        {
+                            new PunchEvent
+                            {
+                                Damage = 5,
+                                KillerId = firstPlayer.Id,
+                                VictimId = secondPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+                            new PlayerDiedEvent
+                            {
+                                KillerId = firstPlayer.Id,
+                                VictimId = secondPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+                            new GameEndedEvent
+                            {
+                                WinnerId = firstPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+                            new RoomDestroyedEvent
+                            {
+                                RoomId = roomId,
+                                Timestamp = timestamps[2]
+                            }
+                        }
+                    };
+                }
             }
+        }
+
+        private static RoomConfig GetRoomConfig(int life)
+        {
+            return new RoomConfig
+            {
+                Player = new PlayerConfig
+                {
+                    InitialLifeAmount = life,
+                    Punch = new PunchConfig
+                    {
+                        Damage = 5,
+                        CriticalChance = 0.5m,
+                        CriticalDamage = 50,
+                        MinimalTimeDiff = TimeSpan.FromSeconds(1)
+                    }
+                },
+                TimeQuant = TimeSpan.FromSeconds(0.1),
+                ClientVersion = 1,
+                MaxPlayers = 2
+            };
         }
 
         public class TestCase
@@ -258,6 +434,8 @@ namespace PunchGame.Server.Tests
             public string CaseName { get; set; }
 
             public RoomConfig Config { get; set; }
+
+            public Guid RoomId { get; set; }
 
             /// <summary>
             /// See https://xkcd.com/221/

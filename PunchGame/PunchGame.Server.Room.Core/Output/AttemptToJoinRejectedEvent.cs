@@ -7,7 +7,7 @@
         public enum RejectReason
         {
             NameNotUnique,
-            VersionMismatch,
+            VersionMismatch, // (TODO) are you sure it should be here, not in scheduler?
             RoomIsFilled
         }
     }

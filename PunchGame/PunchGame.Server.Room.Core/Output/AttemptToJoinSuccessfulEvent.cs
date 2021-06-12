@@ -11,7 +11,7 @@ namespace PunchGame.Server.Room.Core.Output
 
         public class ShortPlayerInfo
         {
-            public Guid UserId { get; set; }
+            public Guid PlayerId { get; set; }
 
             public string Name { get; set; }
 

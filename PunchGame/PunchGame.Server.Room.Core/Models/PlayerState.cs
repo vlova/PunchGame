@@ -4,7 +4,7 @@ namespace PunchGame.Server.Room.Core.Models
 {
     public class PlayerState
     {
-        public Guid UserId { get; set; }
+        public Guid Id { get; set; }
 
         public Guid? ConnectionId { get; set; }
 
@@ -12,7 +12,7 @@ namespace PunchGame.Server.Room.Core.Models
 
         public int Life { get; set; }
 
-        public DateTime LastPunch { get; set; }
+        public DateTime? LastPunch { get; set; }
 
         public bool IsConnected => ConnectionId != null;
 

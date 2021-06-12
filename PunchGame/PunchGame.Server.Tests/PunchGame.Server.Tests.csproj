@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PunchGame.Server.CrossCutting\PunchGame.Server.CrossCutting.csproj" />
     <ProjectReference Include="..\PunchGame.Server.Room.Core\PunchGame.Server.Room.Core.csproj" />
   </ItemGroup>
 

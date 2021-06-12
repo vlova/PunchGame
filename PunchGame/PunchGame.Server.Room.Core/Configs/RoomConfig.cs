@@ -13,5 +13,9 @@ namespace PunchGame.Server.Room.Core.Configs
         /// This makes funny experience - people can kill each one
         /// </summary>
         public TimeSpan TimeQuant { get; set; }
+
+        public int ClientVersion { get; set; }
+
+        public int MaxPlayers { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace PunchGame.Server.Room.Core.Output
 {
@@ -9,5 +10,8 @@ namespace PunchGame.Server.Room.Core.Output
         public string Name { get; set; }
 
         public int LifeAmount { get; set; }
+
+        [JsonIgnore] // attributes are bad, but it's most easy way right now
+        public Guid ConnectionId { get; set; }
     }
 }

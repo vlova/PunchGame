@@ -1,8 +1,10 @@
-# PunchGame
+# What it is
  
 Test project for gamedev company
 
-# Overall architecture
+# Overall
+
+## Overall architecture
 
 Components:
 1. Client without predictions
@@ -11,7 +13,38 @@ Components:
 Highlights:
 - Communication via TCP+JSON
 
-# Game (room) architecture
+## Connection flow
+
+1. Client joins server
+2. Servers find free room (or creates it) and associates that room with client
+3. Server sends to client number of room
+4. Client should send connect to room command with name of user
+5. After that client either will see reject or success event
+6. In case if reject happens because of stupid reason (room is filled or name is not unique), client will try reconnect automatically
+
+# Server 
+
+## Overall architecture
+
+- TcpGameServer is transport wrapper over GameServer. Later transport can be replaced with something else
+- GameServer is responsible for managing clients & rooms & relations of clients/rooms (scheduler)
+- GameClient should be transport-independent representation of connection with client (but it's actually coupled with tcp stack)
+- RoomServer is responsible for storing room state & handling all commands of clients
+
+## Game (scheduler) architecture
+
+There are no architecture, we try to avoid any logic in scheduler architecture.
+Now the logic consists:
+- free room search during initial connect
+- free room search when room is destroyed
+
+Please, note, that commands are part of game-room, not of game-scheduler
+1. Client can't ask for changing room
+2. Client sends name not to scheduler, but to specific room
+
+Such tradeoffs leaves us with very simple overall architecture
+
+## Game (room) architecture
 
 Components:
 - Mutable state
@@ -28,3 +61,7 @@ Flow:
    - Broadcast events to everyone who plays in room
    - Personal events to specific player
    - Internal events to scheduler subsystem
+
+# Client
+
+TODO

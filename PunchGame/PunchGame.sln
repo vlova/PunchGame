@@ -18,6 +18,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{D7960498-BC4D-40F2-8CB5-49A44076F53C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Client.App", "PunchGame.Client.App\PunchGame.Client.App.csproj", "{C3E6D018-E230-4EA5-AB1B-0F052793FE5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.Core", "PunchGame.Server.Core\PunchGame.Server.Core.csproj", "{08B489A3-53E8-494E-88D3-A61114429F7E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +46,14 @@ Global
 		{64F81A01-9888-41E7-A2A0-66D7CDF2BA6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64F81A01-9888-41E7-A2A0-66D7CDF2BA6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64F81A01-9888-41E7-A2A0-66D7CDF2BA6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3E6D018-E230-4EA5-AB1B-0F052793FE5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3E6D018-E230-4EA5-AB1B-0F052793FE5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3E6D018-E230-4EA5-AB1B-0F052793FE5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3E6D018-E230-4EA5-AB1B-0F052793FE5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08B489A3-53E8-494E-88D3-A61114429F7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08B489A3-53E8-494E-88D3-A61114429F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08B489A3-53E8-494E-88D3-A61114429F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08B489A3-53E8-494E-88D3-A61114429F7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +63,8 @@ Global
 		{11378EFE-E285-492F-B60F-C167CB677FE7} = {FC3EAB25-5590-4BE3-B41A-90E5F75EA630}
 		{1EE67945-BE6D-47C9-93C8-E15592AB5642} = {FC3EAB25-5590-4BE3-B41A-90E5F75EA630}
 		{64F81A01-9888-41E7-A2A0-66D7CDF2BA6D} = {FC3EAB25-5590-4BE3-B41A-90E5F75EA630}
+		{C3E6D018-E230-4EA5-AB1B-0F052793FE5A} = {D7960498-BC4D-40F2-8CB5-49A44076F53C}
+		{08B489A3-53E8-494E-88D3-A61114429F7E} = {FC3EAB25-5590-4BE3-B41A-90E5F75EA630}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {77EE5B9A-85C2-41BB-84F7-57D306F86852}

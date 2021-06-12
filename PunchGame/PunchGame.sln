@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.App", "Pun
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.Room.Core", "PunchGame.Server.Room.Core\PunchGame.Server.Room.Core.csproj", "{11378EFE-E285-492F-B60F-C167CB677FE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.Tests", "PunchGame.Server.Tests\PunchGame.Server.Tests.csproj", "{1EE67945-BE6D-47C9-93C8-E15592AB5642}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{11378EFE-E285-492F-B60F-C167CB677FE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11378EFE-E285-492F-B60F-C167CB677FE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11378EFE-E285-492F-B60F-C167CB677FE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EE67945-BE6D-47C9-93C8-E15592AB5642}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EE67945-BE6D-47C9-93C8-E15592AB5642}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EE67945-BE6D-47C9-93C8-E15592AB5642}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EE67945-BE6D-47C9-93C8-E15592AB5642}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

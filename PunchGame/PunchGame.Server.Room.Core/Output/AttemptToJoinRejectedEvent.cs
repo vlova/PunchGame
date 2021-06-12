@@ -7,7 +7,8 @@
         public enum RejectReason
         {
             NameNotUnique,
-            VersionMismatch
+            VersionMismatch,
+            RoomIsFilled
         }
     }
 }

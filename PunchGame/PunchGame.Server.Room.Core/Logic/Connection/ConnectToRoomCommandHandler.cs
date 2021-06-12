@@ -33,6 +33,19 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
                 yield break;
             }
 
+            var isNameGood = IsNameValid(command);
+            if (!isNameGood)
+            {
+                yield return new AttemptToJoinRejectedEvent
+                {
+                    ConnectionId = command.ByConnectionId,
+                    Reason = AttemptToJoinRejectedEvent.RejectReason.NameNotValid,
+                    Timestamp = command.Timestamp
+                };
+
+                yield break;
+            }
+
             var isNameUnique = IsNameUnique(state, command);
             if (!isNameUnique)
             {
@@ -52,6 +65,18 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
                 {
                     ConnectionId = command.ByConnectionId,
                     Reason = AttemptToJoinRejectedEvent.RejectReason.RoomIsFilled,
+                    Timestamp = command.Timestamp
+                };
+
+                yield break;
+            }
+
+            if (state.GameState == GameState.Completed)
+            {
+                yield return new AttemptToJoinRejectedEvent
+                {
+                    ConnectionId = command.ByConnectionId,
+                    Reason = AttemptToJoinRejectedEvent.RejectReason.GameCompleted,
                     Timestamp = command.Timestamp
                 };
 
@@ -93,6 +118,19 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
                     Timestamp = command.Timestamp
                 };
             }
+        }
+
+        private bool IsNameValid(ConnectToRoomCommand command)
+        {
+            return 3 <= command.Name.Length
+                && command.Name.Length <= 8
+                && command.Name.All(c => char.IsDigit(c) || IsLatinChar(c));
+        }
+
+        private bool IsLatinChar(char c)
+        {
+            return ('a' < c && c < 'z')
+                || ('A' < c && c < 'Z');
         }
 
         private bool IsNameUnique(RoomState state, ConnectToRoomCommand command)

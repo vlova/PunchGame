@@ -6,9 +6,11 @@
 
         public enum RejectReason
         {
+            VersionMismatch,
             NameNotUnique,
-            VersionMismatch, // (TODO) are you sure it should be here, not in scheduler?
-            RoomIsFilled
+            NameNotValid,
+            RoomIsFilled,
+            GameCompleted
         }
     }
 }

@@ -20,7 +20,17 @@ namespace PunchGame.Server.Room.Core.Logic.Game
 
         public IEnumerable<GameEvent> Process(RoomState state, PunchCommand command)
         {
+            if (state.GameState != GameState.InProgress)
+            {
+                yield break;
+            }
+
             var killer = state.ConnectionIdToPlayerMap[command.ByConnectionId];
+            if (!killer.IsAlive)
+            {
+                yield break;
+            }
+
             var punch = roomConfig.Player.Punch;
             var canPunch
                 = killer.LastPunch == null
@@ -56,6 +66,7 @@ namespace PunchGame.Server.Room.Core.Logic.Game
                 Timestamp = command.Timestamp
             };
 
+            // TODO: it seems this is not going to work when 3 players kill each other
             var hasOtherAlivePlayers = state.PlayerIdToPlayerMap.Values
                 .Where(p => p.Id != killer.Id && p.Id != victim.Id)
                 .Any(p => p.IsAlive);
@@ -68,6 +79,7 @@ namespace PunchGame.Server.Room.Core.Logic.Game
             yield return new GameEndedEvent
             {
                 Timestamp = command.Timestamp,
+                Reason = GameEndedEvent.EventReason.Win,
                 WinnerId = killer.Id,
             };
 

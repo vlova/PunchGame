@@ -38,6 +38,24 @@ namespace PunchGame.Server.Room.Core.Logic
 
         public IEnumerable<GameEvent> Process(RoomState state, IEnumerable<GameCommand> commands)
         {
+            try
+            {
+                return ProcessInternal(state, commands);
+            }
+            catch (Exception ex)
+            {
+                // TODO: logging
+
+                return new List<GameEvent>
+                {
+                    new GameEndedEvent() { Reason = GameEndedEvent.EventReason.Crash },
+                    new RoomDestroyedEvent()
+                };
+            }
+        }
+
+        private IEnumerable<GameEvent> ProcessInternal(RoomState state, IEnumerable<GameCommand> commands)
+        {
             var allEvents = new List<GameEvent>();
 
             var groupedCommands = commands.GroupBy(g => g.Timestamp.Ticks / roomConfig.TimeQuant.Ticks);

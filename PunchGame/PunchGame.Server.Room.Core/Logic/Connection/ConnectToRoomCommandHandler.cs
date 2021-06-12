@@ -19,7 +19,7 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
             this.config = config;
         }
 
-        public IEnumerable<GameEvent> Process(RoomState state, ConnectToRoomCommand command)
+        public IEnumerable<GameEvent> Process(RoomState stateBefore, RoomState state, ConnectToRoomCommand command)
         {
             if (command.ClientVersion != config.ClientVersion)
             {

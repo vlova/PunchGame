@@ -7,7 +7,7 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
 {
     public class DisconnectCommandHandler : ICommandHandler<DisconnectCommand>
     {
-        public IEnumerable<GameEvent> Process(RoomState state, DisconnectCommand command)
+        public IEnumerable<GameEvent> Process(RoomState stateBefore, RoomState state, DisconnectCommand command)
         {
             yield return new PlayerDisconnectedEvent
             {

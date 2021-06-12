@@ -16,11 +16,11 @@ namespace PunchGame.Server.Room.Core.Logic
             this.handlerMap = HandlersToMap(handlers);
         }
 
-        public IEnumerable<GameEvent> Process(RoomState state, GameCommand command)
+        public IEnumerable<GameEvent> Process(RoomState stateBefore, RoomState state, GameCommand command)
         {
             var commandType = command.GetType();
             dynamic handler = handlerMap[commandType];
-            var events = handler.Process(state, (dynamic)command);
+            var events = handler.Process(stateBefore, state, (dynamic)command);
             return events;
         }
 

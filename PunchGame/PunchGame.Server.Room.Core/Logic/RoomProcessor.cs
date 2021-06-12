@@ -62,21 +62,27 @@ namespace PunchGame.Server.Room.Core.Logic
 
             foreach (var commandGroup in groupedCommands)
             {
-                var groupEvents = new List<GameEvent>();
+                var stateBefore = Clone(state);
                 foreach (var command in commandGroup)
                 {
-                    var events = commandHandler.Process(state, command).ToList();
-                    groupEvents.AddRange(events);
-                    allEvents.AddRange(events);
-                }
+                    var events = commandHandler.Process(stateBefore, state, command).ToList();
 
-                foreach (var @event in groupEvents)
-                {
-                    eventReducer.Process(state, @event);
+                    foreach (var @event in events)
+                    {
+                        eventReducer.Process(state, @event);
+                    }
+
+                    allEvents.AddRange(events);
                 }
             }
 
             return allEvents;
+        }
+
+        private RoomState Clone(RoomState state)
+        {
+            // This is not fast for runtime, but fast for developtime
+            return JsonConvert.DeserializeObject<RoomState>(JsonConvert.SerializeObject(state));
         }
     }
 }

@@ -405,6 +405,140 @@ namespace PunchGame.Server.Tests
                         }
                     };
                 }
+
+                // punch each other creates death & game end 
+                {
+                    var roomId = Guid.NewGuid();
+
+                    var firstPlayer = new
+                    {
+                        ConnectionId = Guid.NewGuid(),
+                        Id = Guid.NewGuid(),
+                        Name = "first",
+                    };
+
+                    var secondPlayer = new
+                    {
+                        ConnectionId = Guid.NewGuid(),
+                        Id = Guid.NewGuid(),
+                        Name = "second",
+                    };
+
+                    var timestamps = new[] {
+                        DateTime.UtcNow,
+                        DateTime.UtcNow.AddSeconds(2),
+                        DateTime.UtcNow.AddSeconds(4)
+                    };
+
+                    yield return new TestCase
+                    {
+                        CaseName = "PunchEachOtherCreatesDeathAndGameEnd",
+                        RoomId = roomId,
+                        Config = GetRoomConfig(life: 10),
+                        RandomValue = 0m,
+                        PlayerIds = {
+                            firstPlayer.Id,
+                            secondPlayer.Id,
+                        },
+                        PrepareCommands =
+                        {
+                            new ConnectToRoomCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Name = firstPlayer.Name,
+                                Timestamp = timestamps[0],
+                                ClientVersion = 1
+                            },
+                            new ConnectToRoomCommand
+                            {
+                                ByConnectionId = secondPlayer.ConnectionId,
+                                Name = secondPlayer.Name,
+                                Timestamp = timestamps[0],
+                                ClientVersion = 1
+                            },
+                            new PunchCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Timestamp = timestamps[1],
+                                VictimId = secondPlayer.Id,
+                            },
+                            new PunchCommand
+                            {
+                                ByConnectionId = secondPlayer.ConnectionId,
+                                Timestamp = timestamps[1],
+                                VictimId = firstPlayer.Id,
+                            }
+                        },
+                        ActCommands =
+                        {
+                            new PunchCommand
+                            {
+                                ByConnectionId = firstPlayer.ConnectionId,
+                                Timestamp = timestamps[2],
+                                VictimId = secondPlayer.Id,
+                            },
+                            new PunchCommand
+                            {
+                                ByConnectionId = secondPlayer.ConnectionId,
+                                Timestamp = timestamps[2],
+                                VictimId = firstPlayer.Id,
+                            }
+                        },
+                        ExpectedEvents =
+                        {
+                            new PunchEvent
+                            {
+                                Damage = 5,
+                                KillerId = firstPlayer.Id,
+                                VictimId = secondPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+                            new PunchEvent
+                            {
+                                Damage = 5,
+                                KillerId = secondPlayer.Id,
+                                VictimId = firstPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+                            new PlayerDiedEvent
+                            {
+                                KillerId = firstPlayer.Id,
+                                VictimId = secondPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+                            new PlayerDiedEvent
+                            {
+                                KillerId = secondPlayer.Id,
+                                VictimId = firstPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+                            
+                            // TODO: it would be more nice, if such event will be only one, but with several winnerIds
+                            new GameEndedEvent
+                            {
+                                WinnerId = firstPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+                            new GameEndedEvent
+                            {
+                                WinnerId = secondPlayer.Id,
+                                Timestamp = timestamps[2]
+                            },
+
+                            // TODO: it would be more nice, if such event will be emitted only once
+                            new RoomDestroyedEvent
+                            {
+                                RoomId = roomId,
+                                Timestamp = timestamps[2]
+                            },
+                            new RoomDestroyedEvent
+                            {
+                                RoomId = roomId,
+                                Timestamp = timestamps[2]
+                            }
+                        }
+                    };
+                }
             }
         }
 

@@ -10,6 +10,6 @@ namespace PunchGame.Server.Room.Core.Logic
 
     public interface ICommandHandler<T> : ICommandHandler
     {
-        IEnumerable<GameEvent> Process(RoomState state, T command);
+        IEnumerable<GameEvent> Process(RoomState stateBefore, RoomState state, T command);
     }
 }

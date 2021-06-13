@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using PunchGame.Client.Core;
 using PunchGame.Server.Room.Core.Input;
 using PunchGame.Server.Room.Core.Output;
-using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
@@ -12,10 +12,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PunchGame.Client.App
+namespace PunchGame.Client.Network
 {
     // TODO: disconnect event
-    class TcpGameSession : INetworkGameSession
+    public class TcpGameSession : INetworkGameSession
     {
         private readonly NetworkConfig networkConfig;
 
@@ -34,8 +34,8 @@ namespace PunchGame.Client.App
 
         public async Task Start()
         {
-            this.tcpClient = new TcpClient(networkConfig.Hostname, networkConfig.Port);
-            this.stream = tcpClient.GetStream();
+            tcpClient = new TcpClient(networkConfig.Hostname, networkConfig.Port);
+            stream = tcpClient.GetStream();
             await Task.WhenAll(
                 Task.Run(() => ListenEvents()),
                 Task.Run(() => WriteCommands())
@@ -44,9 +44,9 @@ namespace PunchGame.Client.App
 
         public void Stop()
         {
-            this.cts.Cancel();
-            this.stream.Close();
-            this.tcpClient.Close();
+            cts.Cancel();
+            stream.Close();
+            tcpClient.Close();
         }
 
         private async Task WriteCommands()
@@ -66,25 +66,23 @@ namespace PunchGame.Client.App
                     jsonWriter.Flush();
                 }
 
-                await Task.Yield();
+                await Task.Delay(1);
             }
         }
 
         private async Task ListenEvents()
         {
-            var reader = new StreamReader(this.stream, Encoding.UTF8);
+            var reader = new StreamReader(stream, Encoding.UTF8);
             var jsonReader = new JsonTextReader(reader);
             var jsonSerialier = GetJsonSerialier();
             jsonReader.SupportMultipleContent = true;
 
-            while (await jsonReader.ReadAsync(this.cts.Token))
+            while (await jsonReader.ReadAsync(cts.Token))
             {
                 var eventObject = jsonSerialier.Deserialize<JObject>(jsonReader);
                 var @event = DeserializeEvent(eventObject);
-                this.Events.Enqueue(@event);
-                // TODO: remove this
-                Console.WriteLine(JsonConvert.SerializeObject(@event));
-                await Task.Yield();
+                Events.Enqueue(@event);
+                await Task.Delay(1);
             }
         }
 
@@ -111,7 +109,7 @@ namespace PunchGame.Client.App
 
         public void ExecuteCommand(GameCommand command)
         {
-            this.commands.Enqueue(command);
+            commands.Enqueue(command);
         }
     }
 }

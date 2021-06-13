@@ -75,7 +75,7 @@ namespace PunchGame.Server.App
             {
                 var command = jsonSerialier.Deserialize<JObject>(jsonReader);
                 gameClient.Inputs.Enqueue(command);
-                await Task.Yield();
+                await Task.Delay(1);
             }
         }
 
@@ -91,8 +91,7 @@ namespace PunchGame.Server.App
                     jsonSerialier.Serialize(jsonWriter, jObject);
                     await jsonWriter.FlushAsync();
                 }
-
-                await Task.Yield();
+                await Task.Delay(1);
             }
         }
 

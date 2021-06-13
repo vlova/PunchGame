@@ -51,7 +51,7 @@ namespace PunchGame.Server.App
             this.state = roomProcessor.MakeInitialState(this.RoomId);
             while (!cts.Token.IsCancellationRequested)
             {
-                await Task.Yield();
+                await Task.Delay(1);
                 var tickCommands = GetCommandsToExecute();
 
                 if (!tickCommands.Any())

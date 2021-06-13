@@ -41,8 +41,7 @@ namespace PunchGame.Server.App
                 {
                     client.AssociatedRoom?.ProcessClientInput(client, input);
                 }
-
-                await Task.Yield();
+                await Task.Delay(1);
             }
         }
 
@@ -107,6 +106,7 @@ namespace PunchGame.Server.App
                 }
             });
 
+            this.FreeRooms.TryAdd(room.RoomId, room);
             return room;
         }
 

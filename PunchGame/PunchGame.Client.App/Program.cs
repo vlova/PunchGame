@@ -1,5 +1,7 @@
-﻿using PunchGame.Server.Room.Core.Input;
-using System;
+﻿using PunchGame.Client.Core;
+using PunchGame.Client.Network;
+using PunchGame.Client.Ui;
+using PunchGame.Server.CrossCutting;
 using System.Threading.Tasks;
 
 namespace PunchGame.Client.App
@@ -8,12 +10,15 @@ namespace PunchGame.Client.App
     {
         async static Task Main(string[] args)
         {
-            var gameSession = new TcpGameSession(new NetworkConfig { Hostname = "127.0.0.1", Port = 6000 });
-            var sessionTask = gameSession.Start();
-            gameSession.ExecuteCommand(new ConnectToRoomCommand { ClientVersion = 1, Name = "olo" });
-            gameSession.ExecuteCommand(new PunchCommand { VictimId = Guid.NewGuid() });
+            var gameSession = new GameSession(
+                () => new TcpGameSession(new NetworkConfig { Hostname = "127.0.0.1", Port = 6000 }),
+                new ClientGameEventReducer(SharedClientServerModule.BuildGameEventReducer()));
 
-            await sessionTask;
+            var game = new Game(gameSession, new GameUi(new GameUiEventRenderer()));
+
+            var gameTask = game.Run();
+
+            await gameTask;
         }
     }
 }

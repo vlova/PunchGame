@@ -3,9 +3,9 @@ using PunchGame.Server.Room.Core.Output;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-namespace PunchGame.Client.App
+namespace PunchGame.Client.Core
 {
-    interface INetworkGameSession
+    public interface INetworkGameSession
     {
         ConcurrentQueue<GameEvent> Events { get; }
 

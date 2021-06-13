@@ -11,7 +11,6 @@ namespace PunchGame.Server.Room.Core.Output
 
         public int LifeAmount { get; set; }
 
-        [JsonIgnore] // attributes are bad, but it's most easy way right now
         public Guid ConnectionId { get; set; }
     }
 }

@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PunchGame.Client.Core\PunchGame.Client.Core.csproj" />
+    <ProjectReference Include="..\PunchGame.Client.Network\PunchGame.Client.Network.csproj" />
+    <ProjectReference Include="..\PunchGame.Client.Ui\PunchGame.Client.Ui.csproj" />
+    <ProjectReference Include="..\PunchGame.Server.CrossCutting\PunchGame.Server.CrossCutting.csproj" />
     <ProjectReference Include="..\PunchGame.Server.Room.Core\PunchGame.Server.Room.Core.csproj" />
   </ItemGroup>
 

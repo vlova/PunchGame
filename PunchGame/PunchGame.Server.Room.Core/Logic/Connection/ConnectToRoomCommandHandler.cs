@@ -102,7 +102,7 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
                 Name = command.Name
             };
 
-            if (state.PlayerIdToPlayerMap.Count == 1)
+            if (true || state.PlayerIdToPlayerMap.Count == 1) // TODO: remove true 
             {
                 yield return new GameStartedEvent
                 {
@@ -129,8 +129,8 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
 
         private bool IsLatinChar(char c)
         {
-            return ('a' < c && c < 'z')
-                || ('A' < c && c < 'Z');
+            return ('a' <= c && c <= 'z')
+                || ('A' <= c && c <= 'Z');
         }
 
         private bool IsNameUnique(RoomState state, ConnectToRoomCommand command)

@@ -2,7 +2,6 @@
 using PunchGame.Server.Room.Core.Logic;
 using PunchGame.Server.Room.Core.Logic.Connection;
 using PunchGame.Server.Room.Core.Logic.Game;
-using PunchGame.Server.Room.Core.Logic.GeneralGameState;
 using System.Collections.Generic;
 
 namespace PunchGame.Server.CrossCutting
@@ -22,12 +21,7 @@ namespace PunchGame.Server.CrossCutting
                 new PunchCommandHandler(config, randomProvider),
             });
 
-            var gameEventReducer = new GameEventReducer(new List<IEventReducer> {
-                new PlayerDisconnectedEventReducer(),
-                new PlayerJoinedEventReducer (),
-                new PunchEventReducer (),
-                new GameStartedEventReducer ()
-            });
+            var gameEventReducer = SharedClientServerModule.BuildGameEventReducer();
 
             return new RoomProcessor(gameCommandHandler, gameEventReducer, config);
         }

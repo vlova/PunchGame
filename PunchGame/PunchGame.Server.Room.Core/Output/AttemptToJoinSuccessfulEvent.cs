@@ -7,6 +7,7 @@ namespace PunchGame.Server.Room.Core.Output
     {
         public Guid JoinedAsPlayerId { get; set; }
 
+        // TODO: this should expose actual roomstate
         public List<ShortPlayerInfo> Players { get; set; }
 
         public class ShortPlayerInfo

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using PunchGame.Server.Room.Core.Models;
+using System;
 
 namespace PunchGame.Server.Room.Core.Output
 {
@@ -7,18 +7,6 @@ namespace PunchGame.Server.Room.Core.Output
     {
         public Guid JoinedAsPlayerId { get; set; }
 
-        // TODO: this should expose actual roomstate
-        public List<ShortPlayerInfo> Players { get; set; }
-
-        public class ShortPlayerInfo
-        {
-            public Guid PlayerId { get; set; }
-
-            public string Name { get; set; }
-
-            public int Life { get; set; }
-
-            public bool IsConnected { get; set; }
-        }
+        public RoomState RoomState { get; set; }
     }
 }

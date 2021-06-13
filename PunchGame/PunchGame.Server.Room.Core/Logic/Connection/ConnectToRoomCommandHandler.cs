@@ -90,7 +90,7 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
                 ConnectionId = command.ByConnectionId,
                 JoinedAsPlayerId = playerId,
                 Timestamp = command.Timestamp,
-                Players = state.PlayerIdToPlayerMap.Values.Select(Map).ToList()
+                RoomState = GetAnticheatModel(state)
             };
 
             yield return new PlayerJoinedEvent
@@ -102,7 +102,7 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
                 Name = command.Name
             };
 
-            if (true || state.PlayerIdToPlayerMap.Count == 1) // TODO: remove true 
+            if (state.PlayerIdToPlayerMap.Count == 1)
             {
                 yield return new GameStartedEvent
                 {
@@ -118,6 +118,12 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
                     Timestamp = command.Timestamp
                 };
             }
+        }
+
+        private static RoomState GetAnticheatModel(RoomState state)
+        {
+            // There are no bad information in room state right now
+            return state.GetFullClone();
         }
 
         private bool IsNameValid(ConnectToRoomCommand command)
@@ -139,17 +145,6 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
             return !state.PlayerIdToPlayerMap.Values
                 .Select(x => x.Name)
                 .Any(name => string.Equals(name, command.Name, StringComparison.InvariantCulture));
-        }
-
-        private AttemptToJoinSuccessfulEvent.ShortPlayerInfo Map(PlayerState arg)
-        {
-            return new AttemptToJoinSuccessfulEvent.ShortPlayerInfo
-            {
-                IsConnected = arg.IsConnected,
-                Life = arg.Life,
-                Name = arg.Name,
-                PlayerId = arg.Id
-            };
         }
     }
 }

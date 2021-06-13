@@ -1,6 +1,7 @@
 ﻿using PunchGame.Server.Room.Core.Logic;
 using PunchGame.Server.Room.Core.Models;
 using PunchGame.Server.Room.Core.Output;
+using System.Linq;
 
 namespace PunchGame.Client.Core
 {
@@ -24,7 +25,12 @@ namespace PunchGame.Client.Core
 
         private void HandleSuccessJoin(RoomState state, AttemptToJoinSuccessfulEvent joinEvent)
         {
-            // TODO: this should init state
+            state.GameState = joinEvent.RoomState.GameState;
+            state.RoomId = joinEvent.RoomState.RoomId;
+
+            var players = joinEvent.RoomState.PlayerIdToPlayerMap.Values;
+            state.ConnectionIdToPlayerMap = players.Where(x => x.ConnectionId.HasValue).ToDictionary(x => x.ConnectionId.Value, x => x);
+            state.PlayerIdToPlayerMap = players.ToDictionary(x => x.Id, x => x);
         }
     }
 }

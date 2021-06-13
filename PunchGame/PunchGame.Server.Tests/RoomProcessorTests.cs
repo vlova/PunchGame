@@ -5,13 +5,11 @@ using PunchGame.Server.CrossCutting;
 using PunchGame.Server.Room.Core.Configs;
 using PunchGame.Server.Room.Core.Input;
 using PunchGame.Server.Room.Core.Logic;
-using PunchGame.Server.Room.Core.Logic.Connection;
-using PunchGame.Server.Room.Core.Logic.Game;
-using PunchGame.Server.Room.Core.Logic.GeneralGameState;
 using PunchGame.Server.Room.Core.Models;
 using PunchGame.Server.Room.Core.Output;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PunchGame.Server.Tests
 {
@@ -50,10 +48,12 @@ namespace PunchGame.Server.Tests
                     var playerName = "trololo";
                     var timestamp = DateTime.UtcNow;
                     var playerId = Guid.NewGuid();
+                    var roomId = Guid.NewGuid();
 
                     yield return new TestCase
                     {
                         CaseName = "SinglePlayerJoin",
+                        RoomId = roomId,
                         Config = GetRoomConfig(life: 100),
                         PlayerIds = {
                             playerId,
@@ -73,8 +73,7 @@ namespace PunchGame.Server.Tests
                             new AttemptToJoinSuccessfulEvent {
                                 ConnectionId = playerConnectionId,
                                 JoinedAsPlayerId = playerId,
-                                Players = new List<AttemptToJoinSuccessfulEvent.ShortPlayerInfo> {
-                                },
+                                RoomState = MakeRoomState(roomId, GameState.NotStarted, new List<PlayerState>{ }),
                                 Timestamp = timestamp,
                             },
                             new PlayerJoinedEvent
@@ -82,7 +81,8 @@ namespace PunchGame.Server.Tests
                                 LifeAmount = 100,
                                 Name = playerName,
                                 PlayerId = playerId,
-                                Timestamp = timestamp
+                                Timestamp = timestamp,
+                                ConnectionId = playerConnectionId
                             }
                         }
                     };
@@ -142,15 +142,19 @@ namespace PunchGame.Server.Tests
                             new AttemptToJoinSuccessfulEvent {
                                 ConnectionId = secondPlayer.ConnectionId,
                                 JoinedAsPlayerId = secondPlayer.Id,
-                                Players = new List<AttemptToJoinSuccessfulEvent.ShortPlayerInfo> {
-                                    new AttemptToJoinSuccessfulEvent.ShortPlayerInfo
-                                    {
-                                        IsConnected = true,
-                                        Life = 100,
-                                        PlayerId = firstPlayer.Id,
-                                        Name = firstPlayer.Name
-                                    },
-                                },
+                                RoomState = MakeRoomState(
+                                    roomId,
+                                    GameState.NotStarted,
+                                    new List<PlayerState> {
+                                        new PlayerState
+                                        {
+                                            ConnectionId = firstPlayer.ConnectionId,
+                                            Id = firstPlayer.Id,
+                                            LastPunch = null,
+                                            Life = 100,
+                                            Name = firstPlayer.Name
+                                        }
+                                    }),
                                 Timestamp = timestamp,
                             },
                             new PlayerJoinedEvent
@@ -158,7 +162,8 @@ namespace PunchGame.Server.Tests
                                 LifeAmount = 100,
                                 Name = secondPlayer.Name,
                                 PlayerId = secondPlayer.Id,
-                                Timestamp = timestamp
+                                Timestamp = timestamp,
+                                ConnectionId = secondPlayer.ConnectionId
                             },
                             new GameStartedEvent
                             {
@@ -543,6 +548,17 @@ namespace PunchGame.Server.Tests
             }
         }
 
+        private static RoomState MakeRoomState(Guid roomId, GameState state, List<PlayerState> players)
+        {
+            return new RoomState
+            {
+                GameState = state,
+                ConnectionIdToPlayerMap = players.Where(p => p.ConnectionId.HasValue).ToDictionary(p => p.ConnectionId.Value, p => p),
+                PlayerIdToPlayerMap = players.ToDictionary(p => p.Id, p => p),
+                RoomId = roomId
+            };
+        }
+
         private static RoomConfig GetRoomConfig(int life)
         {
             return new RoomConfig
@@ -642,7 +658,7 @@ namespace PunchGame.Server.Tests
                     Formatting = Formatting.Indented,
                     DefaultValueHandling = DefaultValueHandling.Include,
                     ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-                    PreserveReferencesHandling = PreserveReferencesHandling.All,
+                    PreserveReferencesHandling = PreserveReferencesHandling.None,
                     TypeNameHandling = TypeNameHandling.All
                 };
 

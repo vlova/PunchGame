@@ -2,6 +2,11 @@
  
 Test project for gamedev company
 
+# Game idea
+
+Just simply punch each other - use console input for that.
+Those who left alive - they are winners
+
 # Overall
 
 ## Overall architecture
@@ -12,6 +17,8 @@ Components:
 
 Highlights:
 - Communication via TCP+JSON
+- When joined client will receive room state. Later will receive only events. He should manually update state to get idea where he is.
+- In order to change room, client need to reconnect server
 
 ## Connection flow
 
@@ -66,4 +73,11 @@ Flow:
 
 # Client
 
-TODO
+Highlights:
+- Client references Server.Room.Core and Server.CrossCutting to be able to reproduce same behavior as server
+
+Components
+- Client.Core - game logic + console controller (console controller should be moved out)
+- Client.Ui - render of ui
+- Client.Network - network layer
+- Client.App - stuff that brings everything together

@@ -31,6 +31,11 @@ namespace PunchGame.Server.Room.Core.Logic.Game
                 yield break;
             }
 
+            if (killer.Id == command.VictimId)
+            {
+                yield break;
+            }
+
             var punch = roomConfig.Player.Punch;
             var canPunch
                 = killer.LastPunch == null

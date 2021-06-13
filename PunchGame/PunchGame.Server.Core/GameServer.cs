@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using PunchGame.Server.Room.Core.Configs;
 using PunchGame.Server.Room.Core.Input;
 using PunchGame.Server.Room.Core.Logic;
@@ -15,26 +16,28 @@ namespace PunchGame.Server.App
     {
         private readonly RoomProcessor roomProcessor;
         private readonly RoomConfig roomConfig;
+        private readonly ILogger logger;
 
         private object roomMakerLocker = new object();
         private ConcurrentDictionary<Guid, GameClient> Clients = new ConcurrentDictionary<Guid, GameClient>();
         private ConcurrentDictionary<Guid, RoomServer> FreeRooms = new ConcurrentDictionary<Guid, RoomServer>();
         private ConcurrentDictionary<Guid, RoomServer> UnavailableRooms = new ConcurrentDictionary<Guid, RoomServer>();
 
-        public GameServer(RoomProcessor roomProcessor, RoomConfig roomConfig)
+        public GameServer(RoomProcessor roomProcessor, RoomConfig roomConfig, ILogger logger)
         {
             this.roomProcessor = roomProcessor;
             this.roomConfig = roomConfig;
+            this.logger = logger;
         }
 
-        public async Task RegisterClient(GameClient client)
+        public async Task RunClient(GameClient client)
         {
             Clients.TryAdd(client.ConnectionId, client);
             AssociateWithFreeRoom(client);
-            await RunClient(client);
+            await RunRegisteredClient(client);
         }
 
-        private async Task RunClient(GameClient client)
+        private async Task RunRegisteredClient(GameClient client)
         {
             while (!client.CancellationToken.IsCancellationRequested)
             {
@@ -62,6 +65,7 @@ namespace PunchGame.Server.App
             var room = GetOrMakeFreeRoom();
             room.RegisterClient(client);
             client.AssociatedRoom = room;
+            logger.LogInformation($"Client {client.ConnectionId} associated with room ${room.RoomId}");
         }
 
         private RoomServer GetOrMakeFreeRoom()
@@ -98,8 +102,11 @@ namespace PunchGame.Server.App
             var room = new RoomServer(
                 this.roomProcessor,
                 this,
-                this.roomConfig
+                this.roomConfig,
+                this.logger
             );
+
+            logger.LogInformation($"New room created ${room.RoomId}");
 
             Task.Run(async () =>
             {
@@ -134,12 +141,14 @@ namespace PunchGame.Server.App
         {
             if (FreeRooms.TryRemove(filledEvent.RoomId, out var room))
             {
+                logger.LogInformation($"Room ${room.RoomId} is filled");
                 UnavailableRooms.TryAdd(room.RoomId, room);
             }
         }
 
         private void HandleRoomDestroyed(RoomDestroyedEvent destroyedEvent)
         {
+            logger.LogInformation($"Destoying room ${destroyedEvent.RoomId}");
             if (FreeRooms.TryRemove(destroyedEvent.RoomId, out var freeRoom))
             {
                 freeRoom.Stop();
@@ -159,6 +168,7 @@ namespace PunchGame.Server.App
                     AssociateWithFreeRoom(client);
                 }
             }
+            logger.LogInformation($"Room ${destroyedEvent.RoomId} is destroyed");
         }
     }
 }

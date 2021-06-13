@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.App", "PunchGame.Server.App\PunchGame.Server.App.csproj", "{F54EE253-9C45-4DE3-861C-47BE703DBB41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Server.App", "PunchGame.Server.App\PunchGame.Server.App.csproj", "{F54EE253-9C45-4DE3-861C-47BE703DBB41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.Room.Core", "PunchGame.Server.Room.Core\PunchGame.Server.Room.Core.csproj", "{11378EFE-E285-492F-B60F-C167CB677FE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Server.Room.Core", "PunchGame.Server.Room.Core\PunchGame.Server.Room.Core.csproj", "{11378EFE-E285-492F-B60F-C167CB677FE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.Tests", "PunchGame.Server.Tests\PunchGame.Server.Tests.csproj", "{1EE67945-BE6D-47C9-93C8-E15592AB5642}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Server.Tests", "PunchGame.Server.Tests\PunchGame.Server.Tests.csproj", "{1EE67945-BE6D-47C9-93C8-E15592AB5642}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.CrossCutting", "PunchGame.Server.CrossCutting\PunchGame.Server.CrossCutting.csproj", "{64F81A01-9888-41E7-A2A0-66D7CDF2BA6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Server.CrossCutting", "PunchGame.Server.CrossCutting\PunchGame.Server.CrossCutting.csproj", "{64F81A01-9888-41E7-A2A0-66D7CDF2BA6D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{FC3EAB25-5590-4BE3-B41A-90E5F75EA630}"
 EndProject
@@ -20,15 +20,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{D7960498-BC4D-40F2-8CB5-49A44076F53C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Client.App", "PunchGame.Client.App\PunchGame.Client.App.csproj", "{C3E6D018-E230-4EA5-AB1B-0F052793FE5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Client.App", "PunchGame.Client.App\PunchGame.Client.App.csproj", "{C3E6D018-E230-4EA5-AB1B-0F052793FE5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.Core", "PunchGame.Server.Core\PunchGame.Server.Core.csproj", "{08B489A3-53E8-494E-88D3-A61114429F7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Server.Core", "PunchGame.Server.Core\PunchGame.Server.Core.csproj", "{08B489A3-53E8-494E-88D3-A61114429F7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Client.Core", "PunchGame.Client.Core\PunchGame.Client.Core.csproj", "{76838E3C-D289-47BB-A1AE-21C87512EEB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Client.Core", "PunchGame.Client.Core\PunchGame.Client.Core.csproj", "{76838E3C-D289-47BB-A1AE-21C87512EEB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Client.Ui", "PunchGame.Client.Ui\PunchGame.Client.Ui.csproj", "{31B61E8D-4803-4490-8C35-E0B571725763}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Client.Ui", "PunchGame.Client.Ui\PunchGame.Client.Ui.csproj", "{31B61E8D-4803-4490-8C35-E0B571725763}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Client.Network", "PunchGame.Client.Network\PunchGame.Client.Network.csproj", "{2E9E29D3-998A-4456-885B-E8069635EADF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PunchGame.Client.Network", "PunchGame.Client.Network\PunchGame.Client.Network.csproj", "{2E9E29D3-998A-4456-885B-E8069635EADF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PunchGame.Server.Networking", "PunchGame.Server.Networking\PunchGame.Server.Networking.csproj", "{BE70B2C3-2BD4-470A-9A98-5ABA9AF700BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,6 +74,10 @@ Global
 		{2E9E29D3-998A-4456-885B-E8069635EADF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E9E29D3-998A-4456-885B-E8069635EADF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E9E29D3-998A-4456-885B-E8069635EADF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE70B2C3-2BD4-470A-9A98-5ABA9AF700BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE70B2C3-2BD4-470A-9A98-5ABA9AF700BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE70B2C3-2BD4-470A-9A98-5ABA9AF700BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE70B2C3-2BD4-470A-9A98-5ABA9AF700BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,6 +92,7 @@ Global
 		{76838E3C-D289-47BB-A1AE-21C87512EEB8} = {D7960498-BC4D-40F2-8CB5-49A44076F53C}
 		{31B61E8D-4803-4490-8C35-E0B571725763} = {D7960498-BC4D-40F2-8CB5-49A44076F53C}
 		{2E9E29D3-998A-4456-885B-E8069635EADF} = {D7960498-BC4D-40F2-8CB5-49A44076F53C}
+		{BE70B2C3-2BD4-470A-9A98-5ABA9AF700BA} = {FC3EAB25-5590-4BE3-B41A-90E5F75EA630}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {77EE5B9A-85C2-41BB-84F7-57D306F86852}

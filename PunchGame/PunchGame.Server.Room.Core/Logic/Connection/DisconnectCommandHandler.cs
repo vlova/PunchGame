@@ -9,14 +9,19 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
     {
         public IEnumerable<GameEvent> Process(RoomState stateBefore, RoomState state, DisconnectCommand command)
         {
-            yield return new PlayerDisconnectedEvent
-            {
-                PlayerId = state.ConnectionIdToPlayerMap[command.ByConnectionId].Id
-            };
+            var wasConnected = state.ConnectionIdToPlayerMap.ContainsKey(command.ByConnectionId);
 
-            if (state.ConnectionIdToPlayerMap.Values.Count == 1) // i.e. we disconnected last player
+            if (wasConnected)
             {
-                yield return new RoomDestroyedEvent { RoomId = state.RoomId, Timestamp = command.Timestamp };
+                yield return new PlayerDisconnectedEvent
+                {
+                    PlayerId = state.ConnectionIdToPlayerMap[command.ByConnectionId].Id
+                };
+
+                if (state.ConnectionIdToPlayerMap.Values.Count == 1) // i.e. we disconnected last player
+                {
+                    yield return new RoomDestroyedEvent { RoomId = state.RoomId, Timestamp = command.Timestamp };
+                }
             }
         }
     }

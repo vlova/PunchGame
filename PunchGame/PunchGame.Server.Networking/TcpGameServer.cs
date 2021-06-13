@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,18 +12,21 @@ using System.Threading.Tasks;
 
 namespace PunchGame.Server.App
 {
+    // TODO: fix impl. GameServer should depend on TcpGameServer
     public class TcpGameServer
     {
         private readonly IPAddress address;
         private readonly int port;
         private readonly GameServer server;
+        private readonly ILogger logger;
         private TcpListener tcpListener;
 
-        public TcpGameServer(IPAddress address, int port, GameServer server)
+        public TcpGameServer(IPAddress address, int port, GameServer server, ILogger logger)
         {
             this.address = address;
             this.port = port;
             this.server = server;
+            this.logger = logger;
         }
 
         public async Task Start()
@@ -39,14 +43,15 @@ namespace PunchGame.Server.App
             {
                 var tcpClient = await this.tcpListener.AcceptTcpClientAsync();
                 var gameClient = new GameClient { TcpClient = tcpClient, Stream = tcpClient.GetStream() };
-                Run(() => ReadFromClient(gameClient));
-                Run(() => WriteToClient(gameClient));
-                Run(() => CheckClientAlive(gameClient));
-                Run(() => server.RegisterClient(gameClient));
+                logger.LogInformation($"New client {gameClient.ConnectionId} connected");
+                Run(() => ReadFromClient(gameClient), "reading from client");
+                Run(() => WriteToClient(gameClient), "writing to client");
+                Run(() => CheckClientAlive(gameClient), "checking client alive");
+                Run(() => server.RunClient(gameClient), "processing cleint");
             }
         }
 
-        private void Run(Func<Task> action)
+        private void Run(Func<Task> action, string operation)
         {
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             Task.Run(async () =>
@@ -57,8 +62,7 @@ namespace PunchGame.Server.App
                 }
                 catch (Exception ex)
                 {
-                    // TODO: exception handling
-                    Debugger.Break();
+                    logger.LogError(ex, $"Crash during {operation}");
                 }
             });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -82,6 +86,7 @@ namespace PunchGame.Server.App
             }
             catch (IOException)
             {
+                logger.LogInformation($"Client {gameClient.ConnectionId} disconnected");
                 gameClient.OnDisconnect();
             }
         }
@@ -106,6 +111,7 @@ namespace PunchGame.Server.App
             }
             catch (IOException)
             {
+                logger.LogInformation($"Client {gameClient.ConnectionId} disconnected");
                 gameClient.OnDisconnect();
             }
         }

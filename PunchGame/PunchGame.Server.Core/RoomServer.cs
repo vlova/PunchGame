@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PunchGame.Server.Room.Core.Configs;
 using PunchGame.Server.Room.Core.Input;
@@ -19,7 +20,7 @@ namespace PunchGame.Server.App
         private readonly RoomProcessor roomProcessor;
         private readonly GameServer gameServer;
         private readonly RoomConfig roomConfig;
-
+        private readonly ILogger logger;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
 
         private readonly ConcurrentQueue<GameCommand> commandsQueue
@@ -34,11 +35,12 @@ namespace PunchGame.Server.App
 
         public IEnumerable<GameClient> Clients => this.connectionIdToClientMap.Values;
 
-        public RoomServer(RoomProcessor roomProcessor, GameServer gameServer, RoomConfig roomConfig)
+        public RoomServer(RoomProcessor roomProcessor, GameServer gameServer, RoomConfig roomConfig, ILogger logger)
         {
             this.roomProcessor = roomProcessor;
             this.gameServer = gameServer;
             this.roomConfig = roomConfig;
+            this.logger = logger;
         }
 
         public async Task Start()
@@ -49,6 +51,7 @@ namespace PunchGame.Server.App
             }
 
             this.state = roomProcessor.MakeInitialState(this.RoomId);
+            logger.LogInformation($"Created initial state of room ${this.RoomId}");
             while (!cts.Token.IsCancellationRequested)
             {
                 await Task.Delay(1);
@@ -60,12 +63,8 @@ namespace PunchGame.Server.App
                 }
 
 
-                // TODO: remove console
-                Console.WriteLine(JsonConvert.SerializeObject(new { tickCommands }));
                 var events = this.roomProcessor.Process(this.state, tickCommands);
 
-                // TODO: remove console
-                Console.WriteLine(JsonConvert.SerializeObject(new { events }));
                 foreach (var @event in events)
                 {
                     ProcessEvent(@event);
@@ -76,11 +75,13 @@ namespace PunchGame.Server.App
         public void Stop()
         {
             this.cts.Cancel();
+            logger.LogInformation($"Stoping ${this.RoomId}");
         }
 
         public void ProcessClientInput(GameClient client, JObject input)
         {
-            this.commandsQueue.Enqueue(MapToGameCommand(client, input));
+            var command = MapToGameCommand(client, input);
+            this.commandsQueue.Enqueue(command);
         }
 
         private static GameCommand MapToGameCommand(GameClient client, JObject input)

@@ -90,7 +90,6 @@ Components
 # Code quality
 
 - No reading of config
-- No logging
 - Most of parts are not complete
 - Communication using blocking collections, need find a better solution
 - Several codes run new tasks without exception handling

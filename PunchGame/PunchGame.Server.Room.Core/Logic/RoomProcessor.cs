@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PunchGame.Server.Room.Core.Configs;
 using PunchGame.Server.Room.Core.Input;
 using PunchGame.Server.Room.Core.Models;
@@ -14,15 +15,18 @@ namespace PunchGame.Server.Room.Core.Logic
         private readonly GameCommandHandler commandHandler;
         private readonly GameEventReducer eventReducer;
         private readonly RoomConfig roomConfig;
+        private readonly ILogger logger;
 
         public RoomProcessor(
             GameCommandHandler commandHandler,
             GameEventReducer eventReducer,
-            RoomConfig roomConfig)
+            RoomConfig roomConfig,
+            ILogger logger)
         {
             this.commandHandler = commandHandler;
             this.eventReducer = eventReducer;
             this.roomConfig = roomConfig;
+            this.logger = logger;
         }
 
         public RoomState MakeInitialState(Guid roomId)
@@ -44,7 +48,11 @@ namespace PunchGame.Server.Room.Core.Logic
             }
             catch (Exception ex)
             {
-                // TODO: logging
+                logger.LogError(
+                    ex,
+                    "Failed to process state {state} and commands {commands}",
+                    SerializeForLog(state),
+                    SerializeForLog(commands));
 
                 return new List<GameEvent>
                 {
@@ -67,9 +75,12 @@ namespace PunchGame.Server.Room.Core.Logic
                 {
                     var events = commandHandler.Process(stateBefore, state, command).ToList();
 
+                    logger.LogInformation("Processed command {command}", SerializeForLog(@command));
+
                     foreach (var @event in events)
                     {
                         eventReducer.Process(state, @event);
+                        logger.LogInformation("Processed event {event}", SerializeForLog(@event));
                     }
 
                     allEvents.AddRange(events);
@@ -77,6 +88,16 @@ namespace PunchGame.Server.Room.Core.Logic
             }
 
             return allEvents;
+        }
+
+        private static string SerializeForLog(object value)
+        {
+            return JsonConvert.SerializeObject(
+                value,
+                new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                });
         }
     }
 }

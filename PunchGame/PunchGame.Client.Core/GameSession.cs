@@ -45,7 +45,8 @@ namespace PunchGame.Client.Core
 
         private async Task ListenEvents()
         {
-            while (!cts.Token.IsCancellationRequested)
+            var seenToken = cts.Token;
+            while (!seenToken.IsCancellationRequested)
             {
                 if (networkSession.Events.TryDequeue(out var @event))
                 {

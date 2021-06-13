@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace PunchGame.Client.Network
 {
-    // TODO: disconnect event
     public class TcpGameSession : INetworkGameSession
     {
         private readonly NetworkConfig networkConfig;
@@ -45,8 +44,14 @@ namespace PunchGame.Client.Network
         public void Stop()
         {
             cts.Cancel();
+
             stream.Close();
+            stream.Dispose();
+            stream = null;
+
             tcpClient.Close();
+            tcpClient.Dispose();
+            tcpClient = null;
         }
 
         private async Task WriteCommands()
@@ -54,7 +59,8 @@ namespace PunchGame.Client.Network
             var streamWriter = new StreamWriter(stream);
             var jsonWriter = new JsonTextWriter(streamWriter);
             var serializer = new JsonSerializer();
-            while (!cts.Token.IsCancellationRequested)
+            var seenToken = cts.Token;
+            while (!seenToken.IsCancellationRequested)
             {
                 if (commands.TryDequeue(out var command))
                 {
@@ -63,7 +69,15 @@ namespace PunchGame.Client.Network
                         commandType = command.GetType().Name,
                         data = command
                     });
-                    jsonWriter.Flush();
+
+                    try
+                    {
+                        jsonWriter.Flush();
+                    }
+                    catch (IOException _)
+                    {
+                        HandleDisconnect();
+                    }
                 }
 
                 await Task.Delay(1);
@@ -77,18 +91,39 @@ namespace PunchGame.Client.Network
             var jsonSerialier = GetJsonSerialier();
             jsonReader.SupportMultipleContent = true;
 
-            while (await jsonReader.ReadAsync(cts.Token))
+            try
             {
-                var eventObject = jsonSerialier.Deserialize<JObject>(jsonReader);
-                var @event = DeserializeEvent(eventObject);
-                Events.Enqueue(@event);
-                await Task.Delay(1);
+                var seenToken = cts.Token;
+                while (await jsonReader.ReadAsync(seenToken))
+                {
+                    var eventObject = jsonSerialier.Deserialize<JObject>(jsonReader);
+                    var @event = DeserializeEvent(eventObject);
+                    if (@event != null)
+                    {
+                        Events.Enqueue(@event);
+                    }
+                    await Task.Delay(1);
+                }
             }
+            catch (IOException _)
+            {
+                HandleDisconnect();
+            }
+        }
+
+        private void HandleDisconnect()
+        {
+            this.Events.Enqueue(new ClientDisconnectedEvent());
         }
 
         private static GameEvent DeserializeEvent(JObject eventObject)
         {
             var eventType = eventObject["eventType"].ToString();
+            if (eventType == "keepAlive")
+            {
+                return null;
+            }
+
             var csharpType = typeof(PlayerDiedEvent).Assembly.ExportedTypes
                 .SingleOrDefault(x => x.Name == eventType);
             var eventData = eventObject["data"].ToString();

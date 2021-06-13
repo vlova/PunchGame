@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using PunchGame.Server.Room.Core.Configs;
+using PunchGame.Server.Room.Core.Input;
 using PunchGame.Server.Room.Core.Logic;
 using PunchGame.Server.Room.Core.Output;
 using System;
@@ -33,14 +34,20 @@ namespace PunchGame.Server.App
             await RunClient(client);
         }
 
-        private static async Task RunClient(GameClient client)
+        private async Task RunClient(GameClient client)
         {
             while (!client.CancellationToken.IsCancellationRequested)
             {
                 if (client.Inputs.TryDequeue(out var input))
                 {
                     client.AssociatedRoom?.ProcessClientInput(client, input);
+                    if (input["commandType"].ToString() == nameof(DisconnectCommand))
+                    {
+                        Clients.TryRemove(client.ConnectionId, out var _);
+                        client.Dispose();
+                    }
                 }
+
                 await Task.Delay(1);
             }
         }

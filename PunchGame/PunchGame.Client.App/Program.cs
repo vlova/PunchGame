@@ -14,7 +14,7 @@ namespace PunchGame.Client.App
                 () => new TcpGameSession(new NetworkConfig { Hostname = "127.0.0.1", Port = 6000 }),
                 new ClientGameEventReducer(SharedClientServerModule.BuildGameEventReducer()));
 
-            var game = new Game(gameSession, new GameUi(new GameUiEventRenderer()));
+            var game = new Game(gameSession, new GameUi(new GameUiEventRenderer()), new GameController());
 
             var gameTask = game.Run();
 

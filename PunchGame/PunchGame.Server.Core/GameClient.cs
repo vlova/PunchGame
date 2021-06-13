@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using PunchGame.Server.Room.Core.Input;
 using System;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
@@ -24,11 +26,32 @@ namespace PunchGame.Server.App
 
         public RoomServer AssociatedRoom { get; set; } = null;
 
-        public void Kill()
+        public void OnDisconnect()
+        {
+            this.Inputs.Enqueue(JObject.FromObject(new
+            {
+                commandType = nameof(DisconnectCommand),
+                data = new DisconnectCommand { ByConnectionId = this.ConnectionId, Timestamp = DateTime.UtcNow }
+            }));
+        }
+
+        public void Dispose()
         {
             this.CTS.Cancel();
-            this.Stream.Close();
-            this.TcpClient.Close();
+
+            if (this.Stream != null)
+            {
+                this.Stream.Close();
+                this.Stream.Dispose();
+                this.Stream = null;
+            }
+
+            if (this.TcpClient != null)
+            {
+                this.TcpClient.Close();
+                this.TcpClient.Dispose();
+                this.TcpClient = null;
+            }
         }
     }
 }

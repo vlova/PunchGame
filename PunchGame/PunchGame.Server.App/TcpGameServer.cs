@@ -41,8 +41,8 @@ namespace PunchGame.Server.App
                 var gameClient = new GameClient { TcpClient = tcpClient, Stream = tcpClient.GetStream() };
                 Run(() => ReadFromClient(gameClient));
                 Run(() => WriteToClient(gameClient));
+                Run(() => CheckClientAlive(gameClient));
                 Run(() => server.RegisterClient(gameClient));
-                // TODO: disconnect event considering that tcpClient.Connected is lying
             }
         }
 
@@ -71,11 +71,18 @@ namespace PunchGame.Server.App
             var jsonSerialier = GetJsonSerialier();
             jsonReader.SupportMultipleContent = true;
 
-            while (await jsonReader.ReadAsync(gameClient.CancellationToken))
+            try
             {
-                var command = jsonSerialier.Deserialize<JObject>(jsonReader);
-                gameClient.Inputs.Enqueue(command);
-                await Task.Delay(1);
+                while (await jsonReader.ReadAsync(gameClient.CancellationToken))
+                {
+                    var command = jsonSerialier.Deserialize<JObject>(jsonReader);
+                    gameClient.Inputs.Enqueue(command);
+                    await Task.Delay(1);
+                }
+            }
+            catch (IOException)
+            {
+                gameClient.OnDisconnect();
             }
         }
 
@@ -84,14 +91,31 @@ namespace PunchGame.Server.App
             var writer = new StreamWriter(gameClient.Stream, Encoding.UTF8);
             var jsonWriter = new JsonTextWriter(writer);
             var jsonSerialier = GetJsonSerialier();
+            try
+            {
+                while (!gameClient.CancellationToken.IsCancellationRequested)
+                {
+                    if (gameClient.Outputs.TryDequeue(out var jObject))
+                    {
+                        jsonSerialier.Serialize(jsonWriter, jObject);
+                        await jsonWriter.FlushAsync();
+                    }
+
+                    await Task.Delay(1);
+                }
+            }
+            catch (IOException)
+            {
+                gameClient.OnDisconnect();
+            }
+        }
+
+        private async Task CheckClientAlive(GameClient gameClient)
+        {
             while (!gameClient.CancellationToken.IsCancellationRequested)
             {
-                if (gameClient.Outputs.TryDequeue(out var jObject))
-                {
-                    jsonSerialier.Serialize(jsonWriter, jObject);
-                    await jsonWriter.FlushAsync();
-                }
-                await Task.Delay(1);
+                gameClient.Outputs.Enqueue(JObject.FromObject(new { eventType = "keepAlive" }));
+                await Task.Delay(100);
             }
         }
 

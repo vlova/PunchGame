@@ -18,6 +18,8 @@ namespace PunchGame.Client.Ui
         private readonly List<string> latestEvents = new List<string> { };
 
         private readonly GameUiEventRenderer eventRenderer;
+        private CancellationTokenSource cts;
+        private Thread thread;
 
         public GameUi(GameUiEventRenderer eventRenderer)
         {
@@ -26,16 +28,25 @@ namespace PunchGame.Client.Ui
 
         public void Run()
         {
-            var thread = new Thread(RunInternal);
+            this.latestEvents.Clear();
+            this.cts = new CancellationTokenSource();
+            this.thread = new Thread(RunInternal);
             thread.Start();
+        }
+
+        public void Stop()
+        {
+            cts.Cancel();
+            thread = null;
         }
 
         private void RunInternal()
         {
-            while (true)
+            var seenToken = cts.Token;
+            while (!seenToken.IsCancellationRequested)
             {
                 RoomState lastState = null;
-                while (wantedRenders.TryDequeue(out var render))
+                while (!seenToken.IsCancellationRequested && wantedRenders.TryDequeue(out var render))
                 {
                     var renderedEvent = eventRenderer.RenderEvent(render.state, render.newEvent);
                     if (renderedEvent != null)
@@ -55,8 +66,7 @@ namespace PunchGame.Client.Ui
 
         public void Render(RoomState state, GameEvent newEvent)
         {
-            // TODO: should clone state
-            wantedRenders.Enqueue((state, newEvent));
+            wantedRenders.Enqueue((state.GetFullClone(), newEvent));
         }
 
         private void RenderUi(RoomState state)
@@ -114,7 +124,7 @@ namespace PunchGame.Client.Ui
             var players = state.PlayerIdToPlayerMap.Values.ToList().OrderByDescending(p => p.Life).Take(UiConstants.ConsoleHeight - 2).ToList();
             foreach (var player in players)
             {
-                var connected = player.IsConnected ? "🌐" : " ";
+                var connected = player.IsConnected ? "[+]" : "[-]";
                 ui.Add($"{player.Name.PadRight(UiConstants.NameWidth, ' ')} {Math.Min(player.Life, 99)}♥ {connected}");
             }
 

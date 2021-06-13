@@ -7,6 +7,10 @@ Test project for gamedev company
 Just simply punch each other - use console input for that.
 Those who left alive - they are winners
 
+Two console commands:
+- punch %username%
+- fight more
+
 # Overall
 
 ## Overall architecture
@@ -77,7 +81,43 @@ Highlights:
 - Client references Server.Room.Core and Server.CrossCutting to be able to reproduce same behavior as server
 
 Components
-- Client.Core - game logic + console controller (console controller should be moved out)
-- Client.Ui - render of ui
+- Client.Core - game logic (non pure)
+- Client.Ui - render of ui + console controller
 - Client.Network - network layer
 - Client.App - stuff that brings everything together
+
+
+# Code quality
+
+- PunchGame.Client.App
+  - It's not really completed
+  - No reading of config
+- PunchGame.Client.Core
+  - This sucks a lot, but who cares
+  - GameSession.cs: communication using blocking collections, need find a better solution
+  - Error handling sucks
+- PunchGame.Client.Network
+  - This sucks a lot, but who cares
+  - TcpGameSession.cs: communication using blocking collections, need find a better solution
+  - Error handling sucks
+- PunchGame.Client.Ui
+  - This sucks a lot, but who cares
+- PunchGame.Server.App
+  - This sucks a lot, but who cares
+  - No reading of config
+  - Should consider move Tcp stuff into Networking assembly
+  - TcpGameServer.cs: communication using blocking collections, need find a better solution
+  - Error handling sucks
+- PunchGame.Server.Core
+  - This is almost acceptable for some purposes
+  - No logging
+  - GameClient.cs: communication using blocking collections, need find a better solution
+  - Error handling sucks
+- PunchGame.Server.CrossCutting
+  - No DI? Lol
+- PunchGame.Server.Room.Core
+  - Good project & it's important, because it's a business logic
+- PunchGame.Server.Server.Tests
+  - Only basic tests are present
+
+ Overall: production-unready code

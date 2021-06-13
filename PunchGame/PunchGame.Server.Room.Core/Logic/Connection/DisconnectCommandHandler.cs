@@ -13,6 +13,11 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
             {
                 PlayerId = state.ConnectionIdToPlayerMap[command.ByConnectionId].Id
             };
+
+            if (state.ConnectionIdToPlayerMap.Values.Count == 1) // i.e. we disconnected last player
+            {
+                yield return new RoomDestroyedEvent { RoomId = state.RoomId, Timestamp = command.Timestamp };
+            }
         }
     }
 }

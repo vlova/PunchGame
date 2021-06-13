@@ -56,11 +56,6 @@ namespace PunchGame.Server.App
             var room = GetOrMakeFreeRoom();
             room.RegisterClient(client);
             client.AssociatedRoom = room;
-            client.Outputs.Enqueue(JObject.FromObject(new
-            {
-                eventType = "FoundRoomEvent",
-                data = new { roomId = room.RoomId }
-            }));
         }
 
         private RoomServer GetOrMakeFreeRoom()

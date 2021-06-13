@@ -84,15 +84,14 @@ namespace PunchGame.Server.App
             var writer = new StreamWriter(gameClient.Stream, Encoding.UTF8);
             var jsonWriter = new JsonTextWriter(writer);
             var jsonSerialier = GetJsonSerialier();
-            while (gameClient.Outputs.TryDequeue(out var jObject))
+            while (!gameClient.CancellationToken.IsCancellationRequested)
             {
-                if (gameClient.CancellationToken.IsCancellationRequested)
+                if (gameClient.Outputs.TryDequeue(out var jObject))
                 {
-                    return;
+                    jsonSerialier.Serialize(jsonWriter, jObject);
+                    await jsonWriter.FlushAsync();
                 }
 
-                jsonSerialier.Serialize(jsonWriter, jObject);
-                await jsonWriter.FlushAsync();
                 await Task.Yield();
             }
         }
@@ -117,6 +116,7 @@ namespace PunchGame.Server.App
 
             this.tcpListener.Stop();
             this.tcpListener = null;
+            // TODO: kill all game clients
         }
 
         ~TcpGameServer()

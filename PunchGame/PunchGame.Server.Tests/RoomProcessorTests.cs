@@ -500,6 +500,7 @@ namespace PunchGame.Server.Tests
                                 VictimId = firstPlayer.Id,
                                 Timestamp = timestamps[2]
                             },
+
                             new PlayerDiedEvent
                             {
                                 KillerId = firstPlayer.Id,

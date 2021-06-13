@@ -86,12 +86,9 @@ namespace PunchGame.Server.App
         private static GameCommand MapToGameCommand(GameClient client, JObject input)
         {
             var commandType = input["commandType"].Value<string>();
-            var commandTypeToCSharpTypeMap = new Dictionary<string, Type>
-            {
-                { "connectToRoom", typeof(ConnectToRoomCommand) },
-                { "punch", typeof(PunchCommand) }
-            };
-            var csharpType = commandTypeToCSharpTypeMap[commandType];
+            // TODO: consider caching
+            var csharpType = typeof(ConnectToRoomCommand).Assembly.ExportedTypes
+                .SingleOrDefault(x => x.Name == commandType);
             var commandData = input["data"].ToString();
             var command = JsonConvert.DeserializeObject(commandData, csharpType) as GameCommand;
             command.ByConnectionId = client.ConnectionId;

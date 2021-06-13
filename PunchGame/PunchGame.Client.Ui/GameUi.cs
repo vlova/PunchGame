@@ -12,6 +12,8 @@ namespace PunchGame.Client.Ui
 {
     public class GameUi : IGameUi
     {
+        private static readonly List<string> EmptyUi = MakeEmptyUi();
+
         private readonly ConcurrentQueue<(RoomState state, GameEvent newEvent)> wantedRenders
             = new ConcurrentQueue<(RoomState state, GameEvent newEvent)>();
 
@@ -75,6 +77,7 @@ namespace PunchGame.Client.Ui
             {
                 Console.Clear();
                 Console.SetWindowSize(UiConstants.ConsoleWidth, UiConstants.ConsoleHeight);
+                Console.SetBufferSize(UiConstants.ConsoleWidth, UiConstants.ConsoleHeight);
 
                 var ui = BuildUI(state);
                 foreach (var line in ui.Take(ui.Count))
@@ -92,25 +95,24 @@ namespace PunchGame.Client.Ui
 
         private List<string> BuildUI(RoomState state)
         {
-            var emptyLine = string.Join("", Enumerable.Repeat(' ', UiConstants.ConsoleWidth));
-            var ui = Enumerable.Repeat(emptyLine, UiConstants.ConsoleHeight - 2).ToList();
+            var ui = EmptyUi;
             ui = MergeUi(ui, RenderPlayers(state));
             ui = MergeUi(ui, RenderEvents());
             return ui;
         }
 
-        private List<string> MergeUi(List<string> ui1, List<string> ui2)
+        private static List<string> MergeUi(List<string> ui1, List<string> ui2)
         {
             var newUi = new List<string>();
             for (var lineNo = 0; lineNo < Math.Max(ui1.Count, ui2.Count); lineNo++)
             {
-                var ui1Line = lineNo < ui1.Count ? ui1[lineNo] : "";
-                var ui2Line = lineNo < ui2.Count ? ui2[lineNo] : "";
-                var newUiLine = string.Join("",
+                var ui1Line = lineNo < ui1.Count ? ui1[lineNo] : string.Empty;
+                var ui2Line = lineNo < ui2.Count ? ui2[lineNo] : string.Empty;
+                var newUiLine = string.Join(string.Empty,
                     ui1Line.PadRight(UiConstants.ConsoleWidth, ' ').Zip(
                         ui2Line.PadRight(UiConstants.ConsoleWidth, ' '),
-                        (left, b) => (a: left, b))
-                    .Select(t => t.a == ' ' ? t.b : t.a));
+                        (left, right) => (left, right))
+                    .Select(t => t.right == ' ' ? t.left : t.right));
 
                 newUi.Add(newUiLine);
             }
@@ -125,10 +127,22 @@ namespace PunchGame.Client.Ui
             foreach (var player in players)
             {
                 var connected = player.IsConnected ? "[+]" : "[-]";
-                ui.Add($"{player.Name.PadRight(UiConstants.NameWidth, ' ')} {Math.Min(player.Life, 99)}♥ {connected}");
+                var life = LifeToUi(player);
+                ui.Add($"{player.Name.PadRight(UiConstants.NameWidth, ' ')} {life}♥ {connected}");
             }
 
             return ui;
+        }
+
+        private static string LifeToUi(PlayerState player)
+        {
+            var life = player.Life.ToString().PadLeft(UiConstants.LifeWidth);
+            if (life.Length > UiConstants.LifeWidth)
+            {
+                life = "".PadLeft(UiConstants.LifeWidth, '♥');
+            }
+
+            return life;
         }
 
         private List<string> RenderEvents()
@@ -141,6 +155,14 @@ namespace PunchGame.Client.Ui
                 .ToList();
 
             return eventsUi;
+        }
+
+        private static List<string> MakeEmptyUi()
+        {
+            var emptyLine = string.Join(string.Empty, Enumerable.Repeat(' ', UiConstants.ConsoleWidth));
+            var ui = Enumerable.Repeat(emptyLine, UiConstants.ConsoleHeight - 2).ToList();
+            var backgroundUI = Utils.ReadManifestData<GameUi>("background.txt");
+            return MergeUi(ui, backgroundUI);
         }
     }
 }

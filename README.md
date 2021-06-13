@@ -89,35 +89,14 @@ Components
 
 # Code quality
 
-- PunchGame.Client.App
-  - It's not really completed
-  - No reading of config
-- PunchGame.Client.Core
-  - This sucks a lot, but who cares
-  - GameSession.cs: communication using blocking collections, need find a better solution
-  - Error handling sucks
-- PunchGame.Client.Network
-  - This sucks a lot, but who cares
-  - TcpGameSession.cs: communication using blocking collections, need find a better solution
-  - Error handling sucks
-- PunchGame.Client.Ui
-  - This sucks a lot, but who cares
-- PunchGame.Server.App
-  - This sucks a lot, but who cares
-  - No reading of config
-  - Should consider move Tcp stuff into Networking assembly
-  - TcpGameServer.cs: communication using blocking collections, need find a better solution
-  - Error handling sucks
-- PunchGame.Server.Core
-  - This is almost acceptable for some purposes
-  - No logging
-  - GameClient.cs: communication using blocking collections, need find a better solution
-  - Error handling sucks
-- PunchGame.Server.CrossCutting
-  - No DI? Lol
-- PunchGame.Server.Room.Core
-  - Good project & it's important, because it's a business logic
-- PunchGame.Server.Server.Tests
-  - Only basic tests are present
+- No reading of config
+- No logging
+- Most of parts are not complete
+- Communication using blocking collections, need find a better solution
+- Several codes run new tasks without exception handling
+- There are lot of cases not handled properly (for example: no alive server)
+- Best part of solution is PunchGame.Server.Core. This is explainable by next: this what needs to be extended on constant basis
+- Server: Should consider move Tcp stuff into Networking assembly
+- Only basic tests are present
 
  Overall: production-unready code

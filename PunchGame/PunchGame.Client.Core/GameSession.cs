@@ -26,7 +26,7 @@ namespace PunchGame.Client.Core
             this.gameEventReducer = gameEventReducer;
         }
 
-        public async Task Start()
+        public Task Start()
         {
             if (cts != null)
             {
@@ -37,7 +37,7 @@ namespace PunchGame.Client.Core
             RoomState = new RoomState();
             networkSession = networkSessionFactory();
 
-            await Task.WhenAll(
+            return Task.WhenAll(
                 networkSession.Start(),
                 Task.Run(() => ListenEvents())
             );

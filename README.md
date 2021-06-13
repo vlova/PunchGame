@@ -94,7 +94,7 @@ Components
 - Most of parts are not complete
 - Communication using blocking collections, need find a better solution
 - Several codes run new tasks without exception handling
-- There are lot of cases not handled properly (for example: no alive server)
+- There are lot of cases not handled properly
 - Best part of solution is PunchGame.Server.Core. This is explainable by next: this what needs to be extended on constant basis
 - Server: Should consider move Tcp stuff into Networking assembly
 - Only basic tests are present

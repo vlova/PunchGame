@@ -38,7 +38,7 @@ namespace PunchGame.Client.Ui
 
         public void Stop()
         {
-            cts.Cancel();
+            cts?.Cancel();
             thread = null;
         }
 

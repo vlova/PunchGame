@@ -128,7 +128,8 @@ namespace PunchGame.Server.Room.Core.Logic.Connection
 
         private bool IsNameValid(ConnectToRoomCommand command)
         {
-            return 3 <= command.Name.Length
+            return command.Name != null
+                && 3 <= command.Name.Length
                 && command.Name.Length <= 8
                 && command.Name.All(c => char.IsDigit(c) || IsLatinChar(c));
         }

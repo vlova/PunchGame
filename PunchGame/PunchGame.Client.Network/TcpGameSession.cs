@@ -4,7 +4,9 @@ using Newtonsoft.Json.Linq;
 using PunchGame.Client.Core;
 using PunchGame.Server.Room.Core.Input;
 using PunchGame.Server.Room.Core.Output;
+using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -31,11 +33,11 @@ namespace PunchGame.Client.Network
             this.networkConfig = networkConfig;
         }
 
-        public async Task Start()
+        public Task Start()
         {
             tcpClient = new TcpClient(networkConfig.Hostname, networkConfig.Port);
             stream = tcpClient.GetStream();
-            await Task.WhenAll(
+            return Task.WhenAll(
                 Task.Run(() => ListenEvents()),
                 Task.Run(() => WriteCommands())
             );
@@ -43,14 +45,14 @@ namespace PunchGame.Client.Network
 
         public void Stop()
         {
-            cts.Cancel();
+            cts?.Cancel();
 
-            stream.Close();
-            stream.Dispose();
+            stream?.Close();
+            stream?.Dispose();
             stream = null;
 
-            tcpClient.Close();
-            tcpClient.Dispose();
+            tcpClient?.Close();
+            tcpClient?.Dispose();
             tcpClient = null;
         }
 

@@ -2,6 +2,7 @@
 using PunchGame.Server.Room.Core.Models;
 using PunchGame.Server.Room.Core.Output;
 using System;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,20 +52,34 @@ namespace PunchGame.Client.Core
 
         private async Task RunInternal(Action afterConnection)
         {
-            this.cts = new CancellationTokenSource();
-            var gameSessionTask = gameSession.Start();
+            try
+            {
+                this.cts = new CancellationTokenSource();
+                var gameSessionTask = gameSession.Start();
 
-            afterConnection();
+                afterConnection();
 
-            var reactOnEventsTask = Task.Run(() => ReactOnEventsTask());
-            gameSession.ExecuteCommand(new ConnectToRoomCommand { ClientVersion = 1, Name = userName });
+                var reactOnEventsTask = Task.Run(() => ReactOnEventsTask());
+                gameSession.ExecuteCommand(new ConnectToRoomCommand { ClientVersion = 1, Name = userName });
 
-            ui.Run();
+                ui.Run();
 
-            await Task.WhenAll(
-                gameSessionTask,
-                reactOnEventsTask
-            );
+                await Task.WhenAll(
+                    gameSessionTask,
+                    reactOnEventsTask
+                );
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine("Failed to connect to server");
+                this.Stop();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unknown error happened");
+                this.Stop();
+                throw ex;
+            }
         }
 
         public async void Restart()
@@ -84,9 +99,9 @@ namespace PunchGame.Client.Core
 
         public void Stop()
         {
-            this.cts.Cancel();
-            this.ui.Stop();
-            this.gameSession.Stop();
+            this.cts?.Cancel();
+            this.ui?.Stop();
+            this.gameSession?.Stop();
         }
 
         private async Task ReactOnEventsTask()

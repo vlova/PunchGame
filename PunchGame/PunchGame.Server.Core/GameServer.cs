@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using PunchGame.Server.Room.Core.Configs;
 using PunchGame.Server.Room.Core.Input;
 using PunchGame.Server.Room.Core.Logic;
@@ -116,7 +115,7 @@ namespace PunchGame.Server.App
                 }
                 catch (Exception ex)
                 {
-                    Debugger.Break();
+                    logger.LogError(ex, "Failed to srat room");
                 }
             });
 

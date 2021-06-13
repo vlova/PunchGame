@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace PunchGame.Server.CrossCutting
+﻿namespace PunchGame.Server.CrossCutting
 {
     class ServerNetworkConfig
     {

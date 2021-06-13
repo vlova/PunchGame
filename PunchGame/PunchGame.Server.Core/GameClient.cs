@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using PunchGame.Server.Room.Core.Input;
 using System;
 using System.Collections.Concurrent;

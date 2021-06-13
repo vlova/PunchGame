@@ -67,7 +67,7 @@ Flow:
 2. Game commands are grouped by time quant. By this we ensure funny behavior like "two players can kill each other". But this is not required by tech task
 3. For each quant we do next:
    1. Clone state so we can know which state was before commands are executed in this quant
-   2 For each command
+   2. For each command
      1. Execute command handler, which is producing events only (doesn't mutate state)
      2. Execute event reducers, which are mutating state only (doesn't produce more events yet)
 4. Transmit events:

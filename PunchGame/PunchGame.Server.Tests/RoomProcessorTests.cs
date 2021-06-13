@@ -200,7 +200,7 @@ namespace PunchGame.Server.Tests
                     {
                         CaseName = "PunchCreatesDamage",
                         Config = GetRoomConfig(life: 100),
-                        RandomValue = 0m,
+                        RandomValue = 0,
                         PlayerIds = {
                             firstPlayer.Id,
                             secondPlayer.Id,
@@ -273,7 +273,7 @@ namespace PunchGame.Server.Tests
                         CaseName = "SecondPunchDoesntWorks",
                         RoomId = roomId,
                         Config = GetRoomConfig(life: 10),
-                        RandomValue = 0m,
+                        RandomValue = 0,
                         PlayerIds = {
                             firstPlayer.Id,
                             secondPlayer.Id,
@@ -345,7 +345,7 @@ namespace PunchGame.Server.Tests
                         CaseName = "PunchCreatesDeathAndGameEnd",
                         RoomId = roomId,
                         Config = GetRoomConfig(life: 10),
-                        RandomValue = 0m,
+                        RandomValue = 0,
                         PlayerIds = {
                             firstPlayer.Id,
                             secondPlayer.Id,
@@ -440,7 +440,7 @@ namespace PunchGame.Server.Tests
                         CaseName = "PunchEachOtherCreatesDeathAndGameEnd",
                         RoomId = roomId,
                         Config = GetRoomConfig(life: 10),
-                        RandomValue = 0m,
+                        RandomValue = 0,
                         PlayerIds = {
                             firstPlayer.Id,
                             secondPlayer.Id,
@@ -569,7 +569,7 @@ namespace PunchGame.Server.Tests
                     Punch = new PunchConfig
                     {
                         Damage = 5,
-                        CriticalChance = 0.5m,
+                        CriticalChance = 0.5,
                         CriticalDamage = 50,
                         MinimalTimeDiff = TimeSpan.FromSeconds(1)
                     }
@@ -591,7 +591,7 @@ namespace PunchGame.Server.Tests
             /// <summary>
             /// See https://xkcd.com/221/
             /// </summary>
-            public decimal RandomValue { get; set; } = 0.4m;
+            public double RandomValue { get; set; } = 0.4;
 
             public List<GameCommand> PrepareCommands { get; set; } = new List<GameCommand> { };
 
@@ -617,14 +617,14 @@ namespace PunchGame.Server.Tests
 
         public class StubRandomProvider : IRandomProvider
         {
-            private readonly decimal chance;
+            private readonly double chance;
 
-            public StubRandomProvider(decimal chance)
+            public StubRandomProvider(double chance)
             {
                 this.chance = chance;
             }
 
-            public decimal GetNextChance()
+            public double GetNextChance()
             {
                 return this.chance;
             }

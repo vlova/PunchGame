@@ -1,4 +1,5 @@
-﻿using PunchGame.Client.Core;
+﻿using Microsoft.Extensions.Configuration;
+using PunchGame.Client.Core;
 using PunchGame.Client.Network;
 using PunchGame.Client.Ui;
 using PunchGame.Server.CrossCutting;
@@ -10,8 +11,15 @@ namespace PunchGame.Client.App
     {
         async static Task Main(string[] args)
         {
+            var configBuilder = new ConfigurationBuilder()
+               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+            var config = configBuilder.Build();
+
+            var networkConfig = config.GetSection(nameof(ClientNetworkConfig)).Get<ClientNetworkConfig>();
+
             var gameSession = new GameSession(
-                () => new TcpGameSession(new NetworkConfig { Hostname = "127.0.0.1", Port = 6000 }),
+                () => new TcpGameSession(networkConfig),
                 new ClientGameEventReducer(SharedClientServerModule.BuildGameEventReducer()));
 
             var game = new Game(gameSession, new GameUi(new GameUiEventRenderer()), new GameController());

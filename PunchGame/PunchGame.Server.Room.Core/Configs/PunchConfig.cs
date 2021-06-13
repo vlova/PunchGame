@@ -8,7 +8,7 @@ namespace PunchGame.Server.Room.Core.Configs
 
         public int CriticalDamage { get; set; }
 
-        public decimal CriticalChance { get; set; }
+        public double CriticalChance { get; set; }
 
         public TimeSpan MinimalTimeDiff { get; set; }
     }

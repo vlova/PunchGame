@@ -11,9 +11,9 @@ namespace PunchGame.Server.App
         ThreadLocal<Random> Random = new ThreadLocal<Random>(() => new Random());
 
         // TODO: replace decimal to double
-        public decimal GetNextChance()
+        public double GetNextChance()
         {
-            return (decimal)Random.Value.NextDouble();
+            return Random.Value.NextDouble();
         }
     }
 }

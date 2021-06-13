@@ -18,7 +18,7 @@ namespace PunchGame.Client.Network
 {
     public class TcpGameSession : INetworkGameSession
     {
-        private readonly NetworkConfig networkConfig;
+        private readonly ClientNetworkConfig networkConfig;
 
         private readonly ConcurrentQueue<GameCommand> commands = new ConcurrentQueue<GameCommand>();
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
@@ -28,7 +28,7 @@ namespace PunchGame.Client.Network
 
         public ConcurrentQueue<GameEvent> Events { get; private set; } = new ConcurrentQueue<GameEvent>();
 
-        public TcpGameSession(NetworkConfig networkConfig)
+        public TcpGameSession(ClientNetworkConfig networkConfig)
         {
             this.networkConfig = networkConfig;
         }

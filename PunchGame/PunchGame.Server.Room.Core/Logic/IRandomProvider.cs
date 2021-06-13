@@ -2,6 +2,6 @@
 {
     public interface IRandomProvider
     {
-        decimal GetNextChance();
+        double GetNextChance();
     }
 }

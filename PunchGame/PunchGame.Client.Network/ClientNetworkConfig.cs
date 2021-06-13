@@ -1,6 +1,6 @@
 ﻿namespace PunchGame.Client.Network
 {
-    public class NetworkConfig
+    public class ClientNetworkConfig
     {
         public string Hostname { get; set; }
 

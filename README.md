@@ -89,11 +89,12 @@ Components
 
 # Code quality
 
-- No reading of config
+- No config validation
 - Most of parts are not complete
 - Communication using blocking collections, need find a better solution
 - Several codes run new tasks without exception handling
-- There are lot of cases not handled properly
+- There are lot of edge cases not handled properly
+- I'm not sure if that really works in likely but not typical cases - didn't had time to test it
 - Best part of solution is PunchGame.Server.Core. This is explainable by next: this what needs to be extended on constant basis
 - Server: Should consider move Tcp stuff into Networking assembly
 - Only basic tests are present
